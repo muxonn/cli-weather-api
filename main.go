@@ -1,65 +1,25 @@
 package main
 
 import (
-	"fmt"
-	"github.com/joho/godotenv"
-	"io"
-	"log"
-	"net/http"
-	"os"
-	"weather-api/internal/models"
+	"weather-api/api"
+	"weather-api/cli"
+	"weather-api/config"
+	"weather-api/internal/types"
 )
 
-func getUrl(location string) string {
-	apiKey := os.Getenv("CLI_WEATHER_API_KEY")
-	return fmt.Sprintf("http://api.weatherapi.com/v1/forecast.json?key=%s&q=%s&days=2&aqi=no&alerts=no", apiKey, location)
-}
-
 func main() {
-	err := godotenv.Load()
-	args := os.Args
 
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	args := cli.ParseCliArgs()
 
-	if len(args) < 2 {
-		log.Fatal("Not enough arguments, you have to provide the location")
-	}
+	cfg := config.LoadConfig()
 
-	arg := args[1]
-
-	resp, err := http.Get(getUrl(arg))
+	weather, err := api.GetWeather(args.Location, cfg)
 
 	if err != nil {
 		panic(err)
 	}
 
-	if resp.StatusCode != 200 {
-		log.Fatal("Something went wrong...")
-	}
-
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			return
-		}
-	}(resp.Body)
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		panic(err)
-	}
-
-	var weather models.Weather
-
-	err = weather.Decode(body)
-
-	if err != nil {
-		panic(err)
-	}
-
-	if len(args) > 2 && args[2] == "-f" {
+	if args.WeatherType == types.Forecast {
 		weather.ShowForecast()
 		return
 	}
