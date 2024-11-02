@@ -10,7 +10,6 @@ import (
 )
 
 func getWeatherApiUrl(location string, apiKey string) string {
-
 	return fmt.Sprintf("http://api.weatherapi.com/v1/forecast.json?key=%s&q=%s&days=2&aqi=no&alerts=no", apiKey, location)
 }
 

@@ -1,5 +1,7 @@
 package types
 
+import "errors"
+
 type WeatherType int
 
 const (
@@ -16,13 +18,13 @@ func (wt WeatherType) String() string {
 	return weatherTypeName[wt]
 }
 
-func ParseWeatherType(flag string) WeatherType {
+func ParseWeatherType(flag string) (WeatherType, error) {
 	switch flag {
 	case "-c":
-		return Current
+		return Current, nil
 	case "-f":
-		return Forecast
+		return Forecast, nil
 	default:
-		return Current
+		return 0, errors.New("invalid weather type: use -c for current or -f for forecast")
 	}
 }
